@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface PetRepository extends JpaRepository<UUID, Pet> {
+public interface PetRepository extends JpaRepository<Pet, UUID> {
 }

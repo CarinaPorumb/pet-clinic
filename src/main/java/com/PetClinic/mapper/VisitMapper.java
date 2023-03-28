@@ -6,7 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface VisitMapper {
-
     Visit visitDtoToVisit(VisitDTO dto);
     VisitDTO visitToVisitDto(Visit visit);
 }
