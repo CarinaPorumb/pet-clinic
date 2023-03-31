@@ -1,8 +1,9 @@
-package com.PetClinic.service;
+package com.PetClinic.service.impl;
 
 import com.PetClinic.mapper.VisitMapper;
 import com.PetClinic.model.VisitDTO;
 import com.PetClinic.repository.VisitRepository;
+import com.PetClinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

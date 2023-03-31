@@ -1,8 +1,9 @@
-package com.PetClinic.service;
+package com.PetClinic.service.impl;
 
 import com.PetClinic.mapper.OwnerMapper;
 import com.PetClinic.model.OwnerDTO;
 import com.PetClinic.repository.OwnerRepository;
+import com.PetClinic.service.OwnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
