@@ -21,7 +21,7 @@ public class OwnerController {
     public static final String OWNER_PATH_ID = OWNER_PATH + "/{id}";
     private final OwnerService ownerService;
 
-    @GetMapping
+    @GetMapping(OWNER_PATH_ID)
     public OwnerDTO getOwnerById(@PathVariable("id") UUID id) {
         return ownerService.getById(id).orElseThrow(NotFoundException::new);
     }

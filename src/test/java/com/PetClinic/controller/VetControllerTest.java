@@ -1,10 +1,10 @@
 package com.PetClinic.controller;
 
-import com.PetClinic.entity.Owner;
+import com.PetClinic.entity.Vet;
 import com.PetClinic.exception.NotFoundException;
-import com.PetClinic.mapper.OwnerMapper;
-import com.PetClinic.model.OwnerDTO;
-import com.PetClinic.repository.OwnerRepository;
+import com.PetClinic.mapper.VetMapper;
+import com.PetClinic.model.VetDTO;
+import com.PetClinic.repository.VetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.PetClinic.controller.OwnerController.OWNER_PATH_ID;
+import static com.PetClinic.controller.VetController.VET_PATH_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,16 +34,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-class OwnerControllerTest {
+class VetControllerTest {
 
     @Autowired
-    OwnerController ownerController;
+    VetController vetController;
     @Autowired
-    OwnerRepository ownerRepository;
+    VetRepository vetRepository;
+    @Autowired
+    VetMapper vetMapper;
     @Autowired
     ObjectMapper objectMapper;
-    @Autowired
-    OwnerMapper ownerMapper;
     @Autowired
     WebApplicationContext wac;
     MockMvc mockMvc;
@@ -54,103 +54,103 @@ class OwnerControllerTest {
     }
 
     @Test
-    void getOwnerById() {
-        Owner owner = ownerRepository.findAll().get(0);
-        OwnerDTO ownerDto = ownerController.getOwnerById(owner.getId());
-        assertThat(ownerDto).isNotNull();
+    void getVetById() {
+        Vet vet = vetRepository.findAll().get(0);
+        VetDTO vetDTO = vetController.getVetById(vet.getId());
+        assertThat(vetDTO).isNotNull();
     }
 
     @Test
-    void getOwnerByIdNotFound() {
+    void getVetByIdNotFound() {
         assertThrows(NotFoundException.class, () -> {
-            ownerController.getOwnerById(UUID.randomUUID());
+            vetController.getVetById(UUID.randomUUID());
         });
-
     }
 
     @Test
-    void listOwners() {
-        List<OwnerDTO> dtos = ownerController.listOwners();
+    void listVets() {
+        List<VetDTO> dtos = vetController.listVets();
         assertThat(dtos.size()).isEqualTo(3);
     }
 
     @Rollback
     @Transactional
     @Test
-    void ownerEmptyList() {
-        ownerRepository.deleteAll();
-        List<OwnerDTO> dtos = ownerController.listOwners();
+    void vetEmptyList() {
+        vetRepository.deleteAll();
+        List<VetDTO> dtos = vetController.listVets();
         assertThat(dtos.size()).isEqualTo(0);
     }
 
     @Rollback
     @Transactional
     @Test
-    void createNewOwner() {
-        OwnerDTO ownerDTO = OwnerDTO.builder().name("New Owner").build();
-        ResponseEntity<?> responseEntity = ownerController.createNewOwner(ownerDTO);
+    void createNewVet() {
+        VetDTO dto = VetDTO.builder().name("New Vet Name").build();
+        ResponseEntity<?> responseEntity = vetController.createNewVet(dto);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(201));
         assertThat(responseEntity.getHeaders().getLocation()).isNotNull();
 
         String[] locationUUID = responseEntity.getHeaders().getLocation().getPath().split("/");
         UUID savedUUID = UUID.fromString(locationUUID[4]);
-        Owner owner = ownerRepository.findById(savedUUID).get();
-        assertThat(owner).isNotNull();
+        Vet vet = vetRepository.findById(savedUUID).get();
+        assertThat(vet).isNotNull();
     }
 
     @Rollback
     @Transactional
     @Test
-    void updateOwnerById() {
-        Owner owner = ownerRepository.findAll().get(0);
-        OwnerDTO ownerDTO = ownerMapper.ownerToOwnerDto(owner);
-        ownerDTO.setId(null);
-        final String ownerName = "Updated";
-        ownerDTO.setName(ownerName);
+    void updateVetById() {
+        Vet vet = vetRepository.findAll().get(0);
+        VetDTO vetDTO = vetMapper.vetToVetDto(vet);
+        vetDTO.setId(null);
+        vetDTO.setSpeciality(null);
+        final String vetName = "Updated";
+        vetDTO.setName(vetName);
 
-        ResponseEntity<?> responseEntity = ownerController.updateOwnerById(owner.getId(), ownerDTO);
+        ResponseEntity<?> responseEntity = vetController.updateVetById(vet.getId(), vetDTO);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(204));
 
-        Owner updateOwner = ownerRepository.findById(owner.getId()).get();
-        assertThat(updateOwner.getName()).isEqualTo(ownerName);
+        Vet updatedVet = vetRepository.findById(vet.getId()).get();
+        assertThat(updatedVet.getName()).isEqualTo(vetName);
     }
 
     @Test
-    void updateOwnerNotFound() {
+    void updateVetNotFound() {
         assertThrows(NotFoundException.class, () -> {
-            ownerController.updateOwnerById(UUID.randomUUID(), OwnerDTO.builder().build());
+            vetController.updateVetById(UUID.randomUUID(), VetDTO.builder().build());
         });
     }
 
     @Rollback
     @Transactional
     @Test
-    void deleteOwnerById() {
-        Owner owner = ownerRepository.findAll().get(0);
-        ResponseEntity<?> responseEntity = ownerController.deleteOwnerById(owner.getId());
+    void deleteVetById() {
+        Vet vet = vetRepository.findAll().get(0);
+        ResponseEntity<?> responseEntity = vetController.deleteVetById(vet.getId());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(204));
-        assertThat(ownerRepository.findById(owner.getId())).isEmpty();
+        assertThat(vetRepository.findById(vet.getId())).isEmpty();
     }
 
     @Test
-    void deleteOwnerByIdNotFound() {
+    void deleteVetByIdNotFound() {
         assertThrows(NotFoundException.class, () -> {
-            ownerController.deleteOwnerById(UUID.randomUUID());
+            vetController.deleteVetById(UUID.randomUUID());
         });
     }
 
     @Test
-    void patchOwnerAttributeTooLong() throws Exception {
-        Owner owner = ownerRepository.findAll().get(0);
-        Map<String, Object> ownerMap = new HashMap<>();
+    void patchVetBadName() throws Exception {
+        Vet vet = vetRepository.findAll().get(0);
 
-        ownerMap.put("telephone", "0123456789012345678901234567890123456789012345678901234567890123456789");
+        Map<String, Object> vetMap = new HashMap<>();
+        vetMap.put("name", "New Name 0123456789012345678901234567890123456789012345678901234567890123456789");
 
-        MvcResult result = mockMvc.perform(patch(OWNER_PATH_ID, owner.getId())
+        MvcResult result = mockMvc.perform(patch(VET_PATH_ID, vet.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(ownerMap)))
+                        .content(objectMapper.writeValueAsString(vetMap)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.length()", is(1)))
                 .andReturn();

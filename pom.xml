@@ -14,7 +14,7 @@
     <name>PetClinic</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>19</java.version>
+        <java.version>20</java.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
 
     </properties>
