@@ -5,6 +5,7 @@ import com.PetClinic.model.VisitDTO;
 import com.PetClinic.repository.VisitRepository;
 import com.PetClinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,18 +14,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
+@Primary
 @RequiredArgsConstructor
 @Service
-public class VisitServiceImpl implements VisitService {
+public class VisitServiceJpaImpl implements VisitService {
 
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
-
-    @Override
-    public Optional<VisitDTO> getById(UUID id) {
-        return Optional.ofNullable(visitMapper.visitToVisitDto(visitRepository.findById(id).orElse(null)));
-    }
 
     @Override
     public List<VisitDTO> listVisits() {
@@ -32,6 +28,11 @@ public class VisitServiceImpl implements VisitService {
                 .stream()
                 .map(visitMapper::visitToVisitDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<VisitDTO> getById(UUID id) {
+        return Optional.ofNullable(visitMapper.visitToVisitDto(visitRepository.findById(id).orElse(null)));
     }
 
     @Override

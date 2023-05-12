@@ -32,7 +32,7 @@ class OwnerRepositoryTest {
     }
 
     @Test
-    void testSaveCustomerNameTooLong() {
+    void testSaveOwnerNameTooLong() {
         assertThrows(ConstraintViolationException.class, () -> {
             Owner testOwner = ownerRepository.save(Owner.builder()
                     .name("Owner name 123456789123456789123456789123456789123456789123456789123456789123456789")

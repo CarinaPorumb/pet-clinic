@@ -5,6 +5,7 @@ import com.PetClinic.model.OwnerDTO;
 import com.PetClinic.repository.OwnerRepository;
 import com.PetClinic.service.OwnerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,18 +14,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
+@Primary
 @RequiredArgsConstructor
 @Service
-public class OwnerServiceImpl implements OwnerService {
+public class OwnerServiceJpaImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
-
-    @Override
-    public Optional<OwnerDTO> getById(UUID id) {
-        return Optional.ofNullable(ownerMapper.ownerToOwnerDto(ownerRepository.findById(id).orElse(null)));
-    }
 
     @Override
     public List<OwnerDTO> listOwners() {
@@ -32,6 +28,11 @@ public class OwnerServiceImpl implements OwnerService {
                 .stream()
                 .map(ownerMapper::ownerToOwnerDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<OwnerDTO> getById(UUID id) {
+        return Optional.ofNullable(ownerMapper.ownerToOwnerDto(ownerRepository.findById(id).orElse(null)));
     }
 
     @Override

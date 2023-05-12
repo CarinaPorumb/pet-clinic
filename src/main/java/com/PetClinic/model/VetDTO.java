@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -22,5 +23,8 @@ public class VetDTO {
 
     @NotNull
     private Speciality speciality;
+
+    private Set<PetDTO> pets;
+
 
 }

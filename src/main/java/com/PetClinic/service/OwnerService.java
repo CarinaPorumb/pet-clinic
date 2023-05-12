@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface OwnerService {
 
-    Optional<OwnerDTO> getById(UUID id);
-
     List<OwnerDTO> listOwners();
+
+    Optional<OwnerDTO> getById(UUID id);
 
     OwnerDTO saveNewOwner(OwnerDTO ownerDTO);
 

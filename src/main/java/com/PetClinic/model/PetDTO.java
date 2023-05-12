@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,10 +27,16 @@ public class PetDTO {
     @Enumerated(EnumType.STRING)
     private PetType petType;
 
-    private OwnerDTO ownerDTO;
+    @NotNull
+    private Integer age;
 
-    private LocalDate birthDate;
+    @NotNull
+    private Double weight;
 
-    @Builder.Default
-    private Set<VisitDTO> visitDTOSet = new HashSet<>();
+    private OwnerDTO owner;
+
+    private VisitDTO visit;
+
+    private Set<VetDTO> vets;
+
 }

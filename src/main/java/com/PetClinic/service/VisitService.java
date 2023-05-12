@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface VisitService {
 
-    Optional<VisitDTO> getById(UUID id);
-
     List<VisitDTO> listVisits();
+
+    Optional<VisitDTO> getById(UUID id);
 
     VisitDTO saveNewVisit(VisitDTO visitDTO);
 

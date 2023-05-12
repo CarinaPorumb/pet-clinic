@@ -10,7 +10,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -20,13 +21,13 @@ import java.util.UUID;
 @ToString
 @Entity
 @NoArgsConstructor
-public class Vet implements Serializable {
+public class Vet {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
+    @Column(name = "vet_id", length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
     private UUID id;
 
     @NotNull
@@ -37,5 +38,10 @@ public class Vet implements Serializable {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Speciality speciality;
+
+    @Builder.Default
+    @ManyToMany(mappedBy = "vets", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    private Set<Pet> pets = new HashSet<>();
 
 }

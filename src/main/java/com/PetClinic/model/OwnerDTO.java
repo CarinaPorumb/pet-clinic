@@ -6,13 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 @Builder
 @Data
 public class OwnerDTO {
-
 
     private UUID id;
 
@@ -31,6 +30,6 @@ public class OwnerDTO {
     @Size(max = 20)
     private String telephone;
 
-    private Set<PetDTO> petDTOSet = new HashSet<>();
+    private Set<PetDTO> pets;
 
 }

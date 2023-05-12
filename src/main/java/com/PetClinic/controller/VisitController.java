@@ -21,17 +21,17 @@ public class VisitController {
     public static final String VISIT_PATH_ID = VISIT_PATH + "/{id}";
     private final VisitService visitService;
 
-    @GetMapping(VISIT_PATH_ID)
-    public VisitDTO getVisitById(@PathVariable("id") UUID id) {
-        return visitService.getById(id).orElseThrow(NotFoundException::new);
-    }
-
-    @GetMapping(VISIT_PATH)
+    @GetMapping(value = VISIT_PATH)
     public List<VisitDTO> listVisits() {
         return visitService.listVisits();
     }
 
-    @PostMapping(VISIT_PATH)
+    @GetMapping(value = VISIT_PATH_ID)
+    public VisitDTO getVisitById(@PathVariable("id") UUID id) {
+        return visitService.getById(id).orElseThrow(NotFoundException::new);
+    }
+
+    @PostMapping(value = VISIT_PATH)
     public ResponseEntity<?> createNewVisit(@Validated @RequestBody VisitDTO visitDTO) {
         VisitDTO savedVisit = visitService.saveNewVisit(visitDTO);
         HttpHeaders headers = new HttpHeaders();
@@ -39,21 +39,21 @@ public class VisitController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @PutMapping(VISIT_PATH_ID)
+    @PutMapping(value = VISIT_PATH_ID)
     public ResponseEntity<?> updateVisitById(@PathVariable("id") UUID id, @Validated @RequestBody VisitDTO visitDTO) {
         if (visitService.updateVisit(id, visitDTO).isEmpty())
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(VISIT_PATH_ID)
+    @DeleteMapping(value = VISIT_PATH_ID)
     public ResponseEntity<?> deleteVisitById(@PathVariable("id") UUID id) {
         if (!visitService.deleteById(id))
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping(VISIT_PATH_ID)
+    @PatchMapping(value = VISIT_PATH_ID)
     public ResponseEntity<?> patchVisitById(@PathVariable("id") UUID id, @RequestBody VisitDTO visitDTO) {
         visitService.patchById(id, visitDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

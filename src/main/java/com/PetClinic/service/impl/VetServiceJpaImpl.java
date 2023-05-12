@@ -5,6 +5,7 @@ import com.PetClinic.model.VetDTO;
 import com.PetClinic.repository.VetRepository;
 import com.PetClinic.service.VetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,18 +14,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
+@Primary
 @RequiredArgsConstructor
 @Service
-public class VetServiceImpl implements VetService {
+public class VetServiceJpaImpl implements VetService {
 
     private final VetRepository vetRepository;
     private final VetMapper vetMapper;
-
-    @Override
-    public Optional<VetDTO> getById(UUID id) {
-        return Optional.ofNullable(vetMapper.vetToVetDto(vetRepository.findById(id).orElse(null)));
-    }
 
     @Override
     public List<VetDTO> listVets() {
@@ -32,6 +28,11 @@ public class VetServiceImpl implements VetService {
                 .stream()
                 .map(vetMapper::vetToVetDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<VetDTO> getById(UUID id) {
+        return Optional.ofNullable(vetMapper.vetToVetDto(vetRepository.findById(id).orElse(null)));
     }
 
     @Override

@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface VetService {
 
-    Optional<VetDTO> getById(UUID id);
-
     List<VetDTO> listVets();
+
+    Optional<VetDTO> getById(UUID id);
 
     VetDTO saveNewVet(VetDTO vetDTO);
 

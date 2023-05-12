@@ -21,17 +21,17 @@ public class VetController {
     public static final String VET_PATH_ID = VET_PATH + "/{id}";
     private final VetService vetService;
 
-    @GetMapping(VET_PATH_ID)
-    public VetDTO getVetById(@PathVariable("id") UUID id) {
-        return vetService.getById(id).orElseThrow(NotFoundException::new);
-    }
-
-    @GetMapping(VET_PATH)
+    @GetMapping(value = VET_PATH)
     public List<VetDTO> listVets() {
         return vetService.listVets();
     }
 
-    @PostMapping(VET_PATH)
+    @GetMapping(value = VET_PATH_ID)
+    public VetDTO getVetById(@PathVariable("id") UUID id) {
+        return vetService.getById(id).orElseThrow(NotFoundException::new);
+    }
+
+    @PostMapping(value = VET_PATH)
     public ResponseEntity<?> createNewVet(@Validated @RequestBody VetDTO vetDTO) {
         VetDTO savedVetDto = vetService.saveNewVet(vetDTO);
         HttpHeaders headers = new HttpHeaders();
@@ -39,21 +39,21 @@ public class VetController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @PutMapping(VET_PATH_ID)
+    @PutMapping(value = VET_PATH_ID)
     public ResponseEntity<?> updateVetById(@PathVariable("id") UUID id, @Validated @RequestBody VetDTO vetDTO) {
         if (vetService.updateVet(id, vetDTO).isEmpty())
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(VET_PATH_ID)
+    @DeleteMapping(value = VET_PATH_ID)
     public ResponseEntity<?> deleteVetById(@PathVariable("id") UUID id) {
         if (!vetService.deleteById(id))
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping(VET_PATH_ID)
+    @PatchMapping(value = VET_PATH_ID)
     public ResponseEntity<?> patchVetById(@PathVariable("id") UUID id, @RequestBody VetDTO vetDTO) {
         vetService.patchById(id, vetDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

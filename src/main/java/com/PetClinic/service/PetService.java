@@ -1,16 +1,17 @@
 package com.PetClinic.service;
 
 import com.PetClinic.model.PetDTO;
+import com.PetClinic.model.enums.PetType;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface PetService {
 
-    Optional<PetDTO> getById(UUID id);
+    Page<PetDTO> listPets(String name, PetType petType, Integer age, Double weight, Integer pageNumber, Integer pageSize);
 
-    List<PetDTO> listPets();
+    Optional<PetDTO> getById(UUID id);
 
     PetDTO saveNewPet(PetDTO petDTO);
 

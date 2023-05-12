@@ -21,17 +21,17 @@ public class OwnerController {
     public static final String OWNER_PATH_ID = OWNER_PATH + "/{id}";
     private final OwnerService ownerService;
 
-    @GetMapping(OWNER_PATH_ID)
-    public OwnerDTO getOwnerById(@PathVariable("id") UUID id) {
-        return ownerService.getById(id).orElseThrow(NotFoundException::new);
-    }
-
-    @GetMapping(OWNER_PATH)
+    @GetMapping(value = OWNER_PATH)
     public List<OwnerDTO> listOwners() {
         return ownerService.listOwners();
     }
 
-    @PostMapping(OWNER_PATH)
+    @GetMapping(value = OWNER_PATH_ID)
+    public OwnerDTO getOwnerById(@PathVariable("id") UUID id) {
+        return ownerService.getById(id).orElseThrow(NotFoundException::new);
+    }
+
+    @PostMapping(value = OWNER_PATH)
     public ResponseEntity<?> createNewOwner(@Validated @RequestBody OwnerDTO ownerDTO) {
         OwnerDTO savedOwner = ownerService.saveNewOwner(ownerDTO);
         HttpHeaders headers = new HttpHeaders();
@@ -39,22 +39,21 @@ public class OwnerController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @PutMapping(OWNER_PATH_ID)
+    @PutMapping(value = OWNER_PATH_ID)
     public ResponseEntity<?> updateOwnerById(@PathVariable("id") UUID id, @Validated @RequestBody OwnerDTO ownerDTO) {
         if (ownerService.updateOwner(id, ownerDTO).isEmpty())
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(OWNER_PATH_ID)
+    @DeleteMapping(value = OWNER_PATH_ID)
     public ResponseEntity<?> deleteOwnerById(@PathVariable("id") UUID id) {
         if (!ownerService.deleteById(id))
             throw new NotFoundException();
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping(OWNER_PATH_ID)
+    @PatchMapping(value = OWNER_PATH_ID)
     public ResponseEntity<?> patchOwnerById(@PathVariable("id") UUID id, @RequestBody OwnerDTO ownerDTO) {
         ownerService.patchById(id, ownerDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
