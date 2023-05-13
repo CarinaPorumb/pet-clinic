@@ -194,6 +194,7 @@ class PetControllerTestIT {
         petMap.put("name", "New Name 0123456789012345678901234567890123456789012345678901234567890123456789");
 
         MvcResult result = mockMvc.perform(patch(PET_PATH_ID, pet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(petMap)))

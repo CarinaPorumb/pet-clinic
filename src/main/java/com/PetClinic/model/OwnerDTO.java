@@ -20,7 +20,6 @@ public class OwnerDTO {
     @Size(max = 75)
     private String name;
 
-    @NotNull
     @NotBlank
     @Size(max = 250)
     private String address;

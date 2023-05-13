@@ -27,10 +27,8 @@ public class PetDTO {
     @Enumerated(EnumType.STRING)
     private PetType petType;
 
-    @NotNull
     private Integer age;
 
-    @NotNull
     private Double weight;
 
     private OwnerDTO owner;

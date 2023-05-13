@@ -8,15 +8,45 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PetServiceMapImpl implements PetService {
 
     private Map<UUID, PetDTO> petDTOMap;
+
+
+    public PetServiceMapImpl() {
+        this.petDTOMap = new HashMap<>();
+
+        PetDTO pet1 = PetDTO.builder()
+                .id(UUID.randomUUID())
+                .name("Rocco")
+                .petType(PetType.CAT)
+                .age(2)
+                .weight(4.5)
+                .build();
+
+        PetDTO pet2 = PetDTO.builder()
+                .id(UUID.randomUUID())
+                .name("Yoda")
+                .petType(PetType.BIRD)
+                .age(5)
+                .weight(0.8)
+                .build();
+
+        PetDTO pet3 = PetDTO.builder()
+                .id(UUID.randomUUID())
+                .name("Nyx")
+                .petType(PetType.DOG)
+                .age(3)
+                .weight(35.0)
+                .build();
+
+        petDTOMap.put(pet1.getId(), pet1);
+        petDTOMap.put(pet2.getId(), pet2);
+        petDTOMap.put(pet3.getId(), pet3);
+    }
 
     @Override
     public Page<PetDTO> listPets(String name, PetType petType, Integer age, Double weight, Integer pageNumber, Integer pageSize) {

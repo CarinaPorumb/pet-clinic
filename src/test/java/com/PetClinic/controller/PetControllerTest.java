@@ -1,160 +1,210 @@
 package com.PetClinic.controller;
 
-import com.PetClinic.entity.Pet;
-import com.PetClinic.exception.NotFoundException;
-import com.PetClinic.mapper.PetMapper;
+import com.PetClinic.config.SpringSecurityConfig;
 import com.PetClinic.model.PetDTO;
-import com.PetClinic.repository.PetRepository;
+import com.PetClinic.service.PetService;
+import com.PetClinic.service.impl.PetServiceMapImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
+import static com.PetClinic.controller.PetController.PET_PATH;
 import static com.PetClinic.controller.PetController.PET_PATH_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-class PetControllerTest {
+@WebMvcTest(PetController.class)
+@Import(SpringSecurityConfig.class)
+public class PetControllerTest {
+
+    public static final String USERNAME = "userPostman";
+    public static final String PASSWORD = "passwordPostman";
 
     @Autowired
-    PetController petController;
-    @Autowired
-    PetRepository petRepository;
-    @Autowired
-    PetMapper petMapper;
+    MockMvc mockMvc;
     @Autowired
     ObjectMapper objectMapper;
-    @Autowired
-    WebApplicationContext wac;
-    MockMvc mockMvc;
+
+    @MockBean
+    PetService petService;
+
+    PetServiceMapImpl petServiceImpl;
+
+    @Captor
+    ArgumentCaptor<UUID> uuidArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<PetDTO> petDTOArgumentCaptor;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        petServiceImpl = new PetServiceMapImpl();
     }
 
     @Test
-    void getPetById() {
-        Pet pet = petRepository.findAll().get(0);
-        PetDTO petDTO = petController.getPetById(pet.getId());
-        assertThat(petDTO).isNotNull();
+    void getPetByid() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+
+        given(petService.getById(testPet.getId())).willReturn(Optional.of(testPet));
+
+        mockMvc.perform(get(PET_PATH_ID, testPet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(testPet.getId().toString())))
+                .andExpect(jsonPath("$.name", is(testPet.getName())));
+
+        verify(petService).getById(uuidArgumentCaptor.capture());
+        assertThat(testPet.getId()).isEqualTo(uuidArgumentCaptor.getValue());
     }
 
     @Test
-    void getVetByIdNotFound() {
-        assertThrows(NotFoundException.class, () -> {
-            petController.getPetById(UUID.randomUUID());
-        });
+    void getPetIdNotFound() throws Exception {
+        given(petService.getById(any(UUID.class))).willReturn(Optional.empty());
+
+        mockMvc.perform(get(PET_PATH_ID, UUID.randomUUID())
+                        .with(httpBasic(USERNAME, PASSWORD)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void listPets() {
-        List<PetDTO> dtos = petController.listPets();
-        assertThat(dtos.size()).isEqualTo(2);
-    }
+    void listPets() throws Exception {
+        given(petService.listPets(any(), any(), any(), any(), any(), any()))
+                .willReturn(petServiceImpl.listPets(null, null, null, null, null, null));
 
-    @Rollback
-    @Transactional
-    @Test
-    void petEmptyList() {
-        petRepository.deleteAll();
-        List<PetDTO> dtos = petController.listPets();
-        assertThat(dtos.size()).isEqualTo(0);
-    }
-
-    @Rollback
-    @Transactional
-    @Test
-    void createNewVet() {
-        PetDTO dto = PetDTO.builder().name("New Pet Name").build();
-        ResponseEntity<?> responseEntity = petController.createNewPet(dto);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(201));
-        assertThat(responseEntity.getHeaders().getLocation()).isNotNull();
-
-        String[] locationUUID = responseEntity.getHeaders().getLocation().getPath().split("/");
-        UUID savedUUID = UUID.fromString(locationUUID[4]);
-        Pet pet = petRepository.findById(savedUUID).get();
-        assertThat(pet).isNotNull();
-    }
-
-    @Rollback
-    @Transactional
-    @Test
-    void updateVetById() {
-        Pet pet = petRepository.findAll().get(0);
-        PetDTO petDTO = petMapper.petToPetDto(pet);
-        petDTO.setId(null);
-        final String petName = "Updated";
-        petDTO.setName(petName);
-
-        ResponseEntity<?> responseEntity = petController.updatePetById(pet.getId(), petDTO);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(204));
-
-        Pet updatedPet = petRepository.findById(pet.getId()).get();
-        assertThat(updatedPet.getName()).isEqualTo(petName);
+        mockMvc.perform(get(PET_PATH)
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()", is(11)));
     }
 
     @Test
-    void updateVetNotFound() {
-        assertThrows(NotFoundException.class, () -> {
-            petController.updatePetById(UUID.randomUUID(), PetDTO.builder().build());
-        });
-    }
+    void createNewPet() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+        testPet.setWeight(null);
+        testPet.setId(null);
 
-    @Rollback
-    @Transactional
-    @Test
-    void deleteVetById() {
-        Pet pet = petRepository.findAll().get(0);
-        ResponseEntity<?> responseEntity = petController.deletePetById(pet.getId());
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.valueOf(204));
-        assertThat(petRepository.findById(pet.getId())).isEmpty();
-    }
+        given(petService.saveNewPet(any(PetDTO.class))).willReturn(petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(1));
 
-    @Test
-    void deleteVetByIdNotFound() {
-        assertThrows(NotFoundException.class, () -> {
-            petController.deletePetById(UUID.randomUUID());
-        });
+        mockMvc.perform(post(PET_PATH)
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testPet)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
+
+        System.out.println(objectMapper.writeValueAsString(testPet));
     }
 
     @Test
-    void patchVetBadName() throws Exception {
-        Pet pet = petRepository.findAll().get(0);
+    void createPetNullPetName() throws Exception {
+        PetDTO testPet = PetDTO.builder().build();
+
+        given(petService.saveNewPet(any(PetDTO.class))).willReturn(petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(1));
+
+        MvcResult mvcResult = mockMvc.perform(post(PET_PATH)
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testPet)))
+                .andExpect(jsonPath("$.length()", is(3)))
+                .andExpect(status().isBadRequest()).andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    void updatePet() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+        given(petService.updatePet(any(), any())).willReturn(Optional.of(testPet));
+
+        mockMvc.perform(put(PET_PATH_ID, testPet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testPet)))
+                .andExpect(status().isNoContent());
+
+        verify(petService).updatePet(uuidArgumentCaptor.capture(), any(PetDTO.class));
+        assertThat(testPet.getId()).isEqualTo(uuidArgumentCaptor.getValue());
+    }
+
+    @Test
+    void updatePetBlankName() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+        testPet.setName("");
+
+        given(petService.updatePet(any(), any())).willReturn(Optional.of(testPet));
+
+        mockMvc.perform(put(PET_PATH_ID, testPet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testPet)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()", is(1)));
+
+        System.out.println(objectMapper.writeValueAsString(testPet));
+
+    }
+
+    @Test
+    void deletePet() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+
+        given(petService.deleteById(any())).willReturn(true);
+
+        mockMvc.perform(delete(PET_PATH_ID, testPet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(petService).deleteById(uuidArgumentCaptor.capture());
+        assertThat(testPet.getId()).isEqualTo(uuidArgumentCaptor.getValue());
+    }
+
+    @Test
+    void patchPet() throws Exception {
+        PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
+        given(petService.patchById(any(), any())).willReturn(Optional.of(testPet));
 
         Map<String, Object> petMap = new HashMap<>();
-        petMap.put("name", "New Name 0123456789012345678901234567890123456789012345678901234567890123456789");
+        petMap.put("name", "newName");
 
-        MvcResult result = mockMvc.perform(patch(PET_PATH_ID, pet.getId())
+        mockMvc.perform(patch(PET_PATH_ID, testPet.getId())
+                        .with(httpBasic(USERNAME, PASSWORD))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(petMap)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.length()", is(1)))
-                .andReturn();
+                .andExpect(status().isNoContent());
 
-        System.out.println(result.getResponse().getContentAsString());
+        verify(petService).patchById(uuidArgumentCaptor.capture(), petDTOArgumentCaptor.capture());
+        assertThat(testPet.getId()).isEqualTo(uuidArgumentCaptor.getValue());
+        assertThat(petMap.get("name")).isEqualTo(petDTOArgumentCaptor.getValue().getName());
     }
 
 }
