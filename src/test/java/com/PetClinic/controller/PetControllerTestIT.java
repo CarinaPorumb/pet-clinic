@@ -28,12 +28,10 @@ import java.util.UUID;
 
 import static com.PetClinic.controller.PetController.PET_PATH;
 import static com.PetClinic.controller.PetController.PET_PATH_ID;
-import static com.PetClinic.controller.PetControllerTest.PASSWORD;
-import static com.PetClinic.controller.PetControllerTest.USERNAME;
+import static com.PetClinic.controller.PetControllerTest.jwt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -92,7 +90,7 @@ class PetControllerTestIT {
     @Test
     void listPetsByName() throws Exception {
         mockMvc.perform(get(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .queryParam("name", "Rocco"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(11)));
@@ -101,7 +99,7 @@ class PetControllerTestIT {
     @Test
     void listPetsByType() throws Exception {
         mockMvc.perform(get(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .queryParam("petType", PetType.CAT.name()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(11)));
@@ -110,7 +108,7 @@ class PetControllerTestIT {
     @Test
     void listPetsByNameAndType() throws Exception {
         mockMvc.perform(get(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .queryParam("name", "Jarrus")
                         .queryParam("petType", PetType.DOG.name()))
                 .andExpect(status().isOk())
@@ -122,10 +120,9 @@ class PetControllerTestIT {
     @Test
     void petEmptyList() {
         petRepository.deleteAll();
-        Page<PetDTO> dtos = petController.listPets(null,null, null, null, null, null);
+        Page<PetDTO> dtos = petController.listPets(null, null, null, null, null, null);
         assertThat(dtos.getContent().size()).isEqualTo(0);
     }
-
 
 
     @Rollback
@@ -194,7 +191,7 @@ class PetControllerTestIT {
         petMap.put("name", "New Name 0123456789012345678901234567890123456789012345678901234567890123456789");
 
         MvcResult result = mockMvc.perform(patch(PET_PATH_ID, pet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(petMap)))
@@ -205,4 +202,5 @@ class PetControllerTestIT {
         System.out.println(result.getResponse().getContentAsString());
     }
 
+    //TODO test to get ObjectOptimisticLockingFailureException
 }

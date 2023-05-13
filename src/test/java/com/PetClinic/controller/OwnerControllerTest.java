@@ -1,6 +1,5 @@
 package com.PetClinic.controller;
 
-import com.PetClinic.config.SpringSecurityConfig;
 import com.PetClinic.model.OwnerDTO;
 import com.PetClinic.service.OwnerService;
 import com.PetClinic.service.impl.OwnerServiceMapImpl;
@@ -12,7 +11,6 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -24,19 +22,16 @@ import java.util.UUID;
 
 import static com.PetClinic.controller.OwnerController.OWNER_PATH;
 import static com.PetClinic.controller.OwnerController.OWNER_PATH_ID;
-import static com.PetClinic.controller.PetControllerTest.PASSWORD;
-import static com.PetClinic.controller.PetControllerTest.USERNAME;
+import static com.PetClinic.controller.PetControllerTest.jwt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OwnerController.class)
-@Import(SpringSecurityConfig.class)
 class OwnerControllerTest {
 
     @Autowired
@@ -67,7 +62,7 @@ class OwnerControllerTest {
         given(ownerService.getById(testOwner.getId())).willReturn(Optional.of(testOwner));
 
         mockMvc.perform(get(OWNER_PATH_ID, testOwner.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -84,7 +79,7 @@ class OwnerControllerTest {
         given(ownerService.getById(any(UUID.class))).willReturn(Optional.empty());
 
         mockMvc.perform(get(OWNER_PATH_ID, UUID.randomUUID())
-                        .with(httpBasic(USERNAME, PASSWORD)))
+                        .with(jwt))
                 .andExpect(status().isNotFound());
     }
 
@@ -93,7 +88,7 @@ class OwnerControllerTest {
         given(ownerService.listOwners()).willReturn(ownerServiceImpl.listOwners());
 
         mockMvc.perform(get(OWNER_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -108,7 +103,7 @@ class OwnerControllerTest {
         given(ownerService.saveNewOwner(any(OwnerDTO.class))).willReturn(ownerServiceImpl.listOwners().get(1));
 
         mockMvc.perform(post(OWNER_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerDTO)))
@@ -123,7 +118,7 @@ class OwnerControllerTest {
         given(ownerService.saveNewOwner(any(OwnerDTO.class))).willReturn(ownerServiceImpl.listOwners().get(1));
 
         MvcResult mvcResult = mockMvc.perform(post(OWNER_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerDTO)))
@@ -138,7 +133,7 @@ class OwnerControllerTest {
         OwnerDTO ownerDTO = ownerServiceImpl.listOwners().get(0);
         given(ownerService.updateOwner(any(), any())).willReturn(Optional.of(OwnerDTO.builder().build()));
         mockMvc.perform(put(OWNER_PATH_ID, ownerDTO.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerDTO)))
@@ -156,7 +151,7 @@ class OwnerControllerTest {
         given(ownerService.updateOwner(any(), any())).willReturn(Optional.of(ownerDTO));
 
         mockMvc.perform(put(OWNER_PATH_ID, ownerDTO.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerDTO)))
@@ -170,7 +165,7 @@ class OwnerControllerTest {
         given(ownerService.deleteById(any())).willReturn(true);
 
         mockMvc.perform(delete(OWNER_PATH_ID, ownerDTO.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
 
                 .andExpect(status().isNoContent());
@@ -188,7 +183,7 @@ class OwnerControllerTest {
         ownerMap.put("name", "New Name");
 
         mockMvc.perform(patch(OWNER_PATH_ID, ownerDTO.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerMap)))
@@ -197,7 +192,6 @@ class OwnerControllerTest {
         verify(ownerService).patchById(uuidArgumentCaptor.capture(), ownerDTOArgumentCaptor.capture());
         assertThat(ownerDTO.getId()).isEqualTo(uuidArgumentCaptor.getValue());
         assertThat(ownerMap.get("name")).isEqualTo(ownerDTOArgumentCaptor.getValue().getName());
-
     }
 
 }

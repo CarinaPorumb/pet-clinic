@@ -1,6 +1,5 @@
 package com.PetClinic.controller;
 
-import com.PetClinic.config.SpringSecurityConfig;
 import com.PetClinic.model.PetDTO;
 import com.PetClinic.service.PetService;
 import com.PetClinic.service.impl.PetServiceMapImpl;
@@ -12,11 +11,12 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,16 +29,12 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PetController.class)
-@Import(SpringSecurityConfig.class)
 public class PetControllerTest {
-
-    public static final String USERNAME = "userPostman";
-    public static final String PASSWORD = "passwordPostman";
 
     @Autowired
     MockMvc mockMvc;
@@ -61,6 +57,15 @@ public class PetControllerTest {
         petServiceImpl = new PetServiceMapImpl();
     }
 
+    public static final SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor jwt = jwt().jwt(jwt -> {
+        jwt.claims(claims -> {
+                    claims.put("scope", "message-read");
+                    claims.put("scope", "message-write");
+                })
+                .subject("messaging-client")
+                .notBefore(Instant.now().minusSeconds(5L));
+    });
+
     @Test
     void getPetByid() throws Exception {
         PetDTO testPet = petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(0);
@@ -68,7 +73,7 @@ public class PetControllerTest {
         given(petService.getById(testPet.getId())).willReturn(Optional.of(testPet));
 
         mockMvc.perform(get(PET_PATH_ID, testPet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -84,7 +89,7 @@ public class PetControllerTest {
         given(petService.getById(any(UUID.class))).willReturn(Optional.empty());
 
         mockMvc.perform(get(PET_PATH_ID, UUID.randomUUID())
-                        .with(httpBasic(USERNAME, PASSWORD)))
+                        .with(jwt))
                 .andExpect(status().isNotFound());
     }
 
@@ -94,7 +99,7 @@ public class PetControllerTest {
                 .willReturn(petServiceImpl.listPets(null, null, null, null, null, null));
 
         mockMvc.perform(get(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -110,7 +115,7 @@ public class PetControllerTest {
         given(petService.saveNewPet(any(PetDTO.class))).willReturn(petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(1));
 
         mockMvc.perform(post(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPet)))
@@ -127,7 +132,7 @@ public class PetControllerTest {
         given(petService.saveNewPet(any(PetDTO.class))).willReturn(petServiceImpl.listPets(null, null, null, null, 1, 25).getContent().get(1));
 
         MvcResult mvcResult = mockMvc.perform(post(PET_PATH)
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPet)))
@@ -143,7 +148,7 @@ public class PetControllerTest {
         given(petService.updatePet(any(), any())).willReturn(Optional.of(testPet));
 
         mockMvc.perform(put(PET_PATH_ID, testPet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPet)))
@@ -161,7 +166,7 @@ public class PetControllerTest {
         given(petService.updatePet(any(), any())).willReturn(Optional.of(testPet));
 
         mockMvc.perform(put(PET_PATH_ID, testPet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPet)))
@@ -179,7 +184,7 @@ public class PetControllerTest {
         given(petService.deleteById(any())).willReturn(true);
 
         mockMvc.perform(delete(PET_PATH_ID, testPet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -196,7 +201,7 @@ public class PetControllerTest {
         petMap.put("name", "newName");
 
         mockMvc.perform(patch(PET_PATH_ID, testPet.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(petMap)))

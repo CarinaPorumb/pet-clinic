@@ -25,12 +25,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.PetClinic.controller.OwnerController.OWNER_PATH_ID;
-import static com.PetClinic.controller.PetControllerTest.PASSWORD;
-import static com.PetClinic.controller.PetControllerTest.USERNAME;
+import static com.PetClinic.controller.PetControllerTest.jwt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -153,7 +151,7 @@ class OwnerControllerTestIT {
         ownerMap.put("telephone", "0123456789012345678901234567890123456789012345678901234567890123456789");
 
         MvcResult result = mockMvc.perform(patch(OWNER_PATH_ID, owner.getId())
-                        .with(httpBasic(USERNAME, PASSWORD))
+                        .with(jwt)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ownerMap)))
