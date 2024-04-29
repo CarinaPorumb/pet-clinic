@@ -6,11 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,14 +24,13 @@ import java.util.UUID;
 public class Pet {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator
     @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "pet_id", length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
     private UUID id;
 
-    @NotNull
-    @NotBlank
+
+    @NotBlank(message = "Name must not be blank")
     @Size(max = 75)
     private String name;
 
@@ -78,4 +78,17 @@ public class Pet {
         this.vets = vets;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pet pet = (Pet) o;
+        return Objects.equals(id, pet.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

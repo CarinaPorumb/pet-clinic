@@ -29,6 +29,8 @@ public class OwnerDTO {
     @Size(max = 20)
     private String telephone;
 
+    private int version;
+
     private Set<PetDTO> pets;
 
 }

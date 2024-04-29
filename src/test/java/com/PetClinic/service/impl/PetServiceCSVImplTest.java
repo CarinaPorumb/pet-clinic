@@ -2,7 +2,6 @@ package com.PetClinic.service.impl;
 
 import com.PetClinic.model.PetCSVRecord;
 import com.PetClinic.service.PetServiceCSV;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
 
@@ -16,10 +15,6 @@ class PetServiceCSVImplTest {
 
     PetServiceCSV petServiceCSV = new PetServiceCSVImpl();
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
     void convertCSV() throws FileNotFoundException {
         File file = ResourceUtils.getFile("classpath:csvdata/pet.csv");
@@ -27,4 +22,5 @@ class PetServiceCSVImplTest {
         System.out.println(records.size());
         assertThat(records.size()).isGreaterThan(0);
     }
+
 }

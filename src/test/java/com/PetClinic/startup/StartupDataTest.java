@@ -42,6 +42,6 @@ class StartupDataTest {
         assertThat(ownerRepository.count()).isEqualTo(3);
         assertThat(vetRepository.count()).isEqualTo(3);
         assertThat(visitRepository.count()).isEqualTo(2);
-        assertThat(petRepository.count()).isEqualTo(73);
+        assertThat(petRepository.count()).isEqualTo(74);
     }
 }

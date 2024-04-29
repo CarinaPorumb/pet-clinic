@@ -2,15 +2,19 @@ package com.PetClinic.service.impl;
 
 import com.PetClinic.model.OwnerDTO;
 import com.PetClinic.service.OwnerService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class OwnerServiceMapImpl implements OwnerService {
 
-    private Map<UUID, com.PetClinic.model.OwnerDTO> ownerDTOMap;
+    private final Map<UUID, OwnerDTO> ownerDTOMap;
 
     public OwnerServiceMapImpl() {
         this.ownerDTOMap = new HashMap<>();
@@ -41,18 +45,19 @@ public class OwnerServiceMapImpl implements OwnerService {
     }
 
     @Override
-    public List<com.PetClinic.model.OwnerDTO> listOwners() {
-        return new ArrayList<>(ownerDTOMap.values());
+    public Page<OwnerDTO> listOwners(int pageNumber, int pageSize) {
+        return null;
     }
 
+
     @Override
-    public Optional<com.PetClinic.model.OwnerDTO> getById(UUID id) {
+    public Optional<OwnerDTO> getById(UUID id) {
         return Optional.of(ownerDTOMap.get(id));
     }
 
     @Override
-    public com.PetClinic.model.OwnerDTO saveNewOwner(com.PetClinic.model.OwnerDTO ownerDTO) {
-        com.PetClinic.model.OwnerDTO savedOwnerDTO = com.PetClinic.model.OwnerDTO.builder()
+    public OwnerDTO saveNewOwner(OwnerDTO ownerDTO) {
+        OwnerDTO savedOwnerDTO = OwnerDTO.builder()
                 .id(UUID.randomUUID())
                 .name(ownerDTO.getName())
                 .address(ownerDTO.getAddress())
@@ -63,7 +68,7 @@ public class OwnerServiceMapImpl implements OwnerService {
     }
 
     @Override
-    public Optional<com.PetClinic.model.OwnerDTO> updateOwner(UUID id, com.PetClinic.model.OwnerDTO ownerDTO) {
+    public Optional<OwnerDTO> updateOwner(UUID id, OwnerDTO ownerDTO) {
         com.PetClinic.model.OwnerDTO ownerDTOExisting = ownerDTOMap.get(id);
         ownerDTOExisting.setName(ownerDTO.getName());
         ownerDTOExisting.setAddress(ownerDTO.getAddress());
@@ -78,7 +83,7 @@ public class OwnerServiceMapImpl implements OwnerService {
     }
 
     @Override
-    public Optional<com.PetClinic.model.OwnerDTO> patchById(UUID id, com.PetClinic.model.OwnerDTO ownerDTO) {
+    public Optional<OwnerDTO> patchById(UUID id, OwnerDTO ownerDTO) {
         com.PetClinic.model.OwnerDTO existing = ownerDTOMap.get(id);
 
         if (StringUtils.hasText(ownerDTO.getName())) {

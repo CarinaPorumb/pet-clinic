@@ -21,7 +21,7 @@ public class CustomErrorController {
         if (exception.getCause().getCause() instanceof ConstraintViolationException) {
             ConstraintViolationException ve = (ConstraintViolationException) exception.getCause().getCause();
 
-            List errors = ve.getConstraintViolations()
+            List<Map<String, String>> errors = ve.getConstraintViolations()
                     .stream()
                     .map(constraintViolation -> {
                         Map<String, String> errorMap = new HashMap<>();
@@ -35,7 +35,7 @@ public class CustomErrorController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<?> handleBindErrors(MethodArgumentNotValidException exception) {
-        List errorList = exception.getFieldErrors()
+        List<Map<String, String>> errorList = exception.getFieldErrors()
                 .stream()
                 .map(fieldError -> {
                     Map<String, String> errorMap = new HashMap<>();
