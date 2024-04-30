@@ -3,6 +3,8 @@ package com.PetClinic.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.UUID;
+
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Value not found!")
 public class NotFoundException extends RuntimeException {
 
@@ -23,5 +25,9 @@ public class NotFoundException extends RuntimeException {
 
     public NotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public NotFoundException(String pet, UUID id) {
+
     }
 }
