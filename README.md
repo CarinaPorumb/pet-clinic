@@ -1,4 +1,4 @@
-# Pet Clinic
+# Pet Clinic  [![CircleCI](https://dl.circleci.com/status-badge/img/circleci/5vWvCHPxWZ7cHvpFmPPqjK/FMuALQo8kLTAXHGsgUwVkq/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/5vWvCHPxWZ7cHvpFmPPqjK/FMuALQo8kLTAXHGsgUwVkq/tree/main)
 
 This project is a simple Java application using Spring Boot that provides a web application aiming to become a management system for a pet clinic. It uses JPA for database integration, REST controllers for API endpoints, and secures its endpoints with JWT tokens through integration with an OAuth2 Authorization Server. The application also uses Spring Cloud Gateway to handle and route requests securely.
 
