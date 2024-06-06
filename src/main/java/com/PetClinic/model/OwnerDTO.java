@@ -1,8 +1,6 @@
 package com.PetClinic.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,22 +13,14 @@ public class OwnerDTO {
 
     private UUID id;
 
-    @NotNull
-    @NotBlank
-    @Size(max = 75)
+    @NotBlank(message = "Name must not be blank")
     private String name;
 
-    @NotBlank
-    @Size(max = 250)
     private String address;
 
-    @NotNull
-    @NotBlank
-    @Size(max = 20)
+    @NotBlank(message = "Telephone must not be blank")
     private String telephone;
 
-    private int version;
-
-    private Set<PetDTO> pets;
+    private Set<UUID> petIds;
 
 }

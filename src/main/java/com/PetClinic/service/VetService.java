@@ -1,23 +1,23 @@
 package com.PetClinic.service;
 
 import com.PetClinic.model.VetDTO;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface VetService {
 
-    List<VetDTO> listVets();
+    Page<VetDTO> listVets(String speciality, int pageNumber, int pageSize);
 
-    Optional<VetDTO> getById(UUID id);
+    Optional<VetDTO> getVetById(UUID id);
 
     VetDTO saveNewVet(VetDTO vetDTO);
 
     Optional<VetDTO> updateVet(UUID id, VetDTO vetDTO);
 
-    boolean deleteById(UUID id);
+    boolean deleteVetById(UUID id);
 
-    Optional<VetDTO> patchById(UUID id, VetDTO vetDTO);
+    Optional<VetDTO> patchVetById(UUID id, VetDTO vetDTO);
 
 }

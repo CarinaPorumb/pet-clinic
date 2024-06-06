@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,13 +23,13 @@ public class VisitController {
     private final VisitService visitService;
 
     @GetMapping(value = VISIT_PATH)
-    public List<VisitDTO> listVisits() {
-        return visitService.listVisits();
+    public List<VisitDTO> listVisits(LocalDate startDate, LocalDate endDate, String diagnosis, int pageNumber, int pageSize) {
+        return visitService.listVisits(startDate, endDate, diagnosis, pageNumber, pageSize);
     }
 
     @GetMapping(value = VISIT_PATH_ID)
     public VisitDTO getVisitById(@PathVariable("id") UUID id) {
-        return visitService.getById(id).orElseThrow(NotFoundException::new);
+        return visitService.getVisitById(id).orElseThrow(NotFoundException::new);
     }
 
     @PostMapping(value = VISIT_PATH)
@@ -48,14 +49,14 @@ public class VisitController {
 
     @DeleteMapping(value = VISIT_PATH_ID)
     public ResponseEntity<?> deleteVisitById(@PathVariable("id") UUID id) {
-        if (!visitService.deleteById(id))
+        if (!visitService.deleteVisitById(id))
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping(value = VISIT_PATH_ID)
     public ResponseEntity<?> patchVisitById(@PathVariable("id") UUID id, @RequestBody VisitDTO visitDTO) {
-        visitService.patchById(id, visitDTO);
+        visitService.patchVisitById(id, visitDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

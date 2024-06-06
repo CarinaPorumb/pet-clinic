@@ -6,10 +6,10 @@ import com.PetClinic.repository.VetRepository;
 import com.PetClinic.service.VetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,21 +23,21 @@ public class VetServiceJpaImpl implements VetService {
     private final VetMapper vetMapper;
 
     @Override
-    public List<VetDTO> listVets() {
-        return vetRepository.findAll()
+    public Page<VetDTO> listVets(String speciality, int pageNumber, int pageSize) {
+        return (Page<VetDTO>) vetRepository.findAll()
                 .stream()
-                .map(vetMapper::vetToVetDto)
+                .map(vetMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<VetDTO> getById(UUID id) {
-        return Optional.ofNullable(vetMapper.vetToVetDto(vetRepository.findById(id).orElse(null)));
+    public Optional<VetDTO> getVetById(UUID id) {
+        return Optional.ofNullable(vetMapper.toDTO(vetRepository.findById(id).orElse(null)));
     }
 
     @Override
     public VetDTO saveNewVet(VetDTO vetDTO) {
-        return vetMapper.vetToVetDto(vetRepository.save(vetMapper.vetDtoToVet(vetDTO)));
+        return vetMapper.toDTO(vetRepository.save(vetMapper.toEntity(vetDTO)));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class VetServiceJpaImpl implements VetService {
         vetRepository.findById(id).ifPresentOrElse(foundVet -> {
             foundVet.setName(vetDTO.getName());
             foundVet.setSpeciality(vetDTO.getSpeciality());
-            atomicReference.set(Optional.of(vetMapper.vetToVetDto(vetRepository.save(foundVet))));
+            atomicReference.set(Optional.of(vetMapper.toDTO(vetRepository.save(foundVet))));
         }, () -> {
             atomicReference.set(Optional.empty());
         });
@@ -54,7 +54,7 @@ public class VetServiceJpaImpl implements VetService {
     }
 
     @Override
-    public boolean deleteById(UUID id) {
+    public boolean deleteVetById(UUID id) {
         if (vetRepository.existsById(id)) {
             vetRepository.deleteById(id);
             return true;
@@ -63,7 +63,7 @@ public class VetServiceJpaImpl implements VetService {
     }
 
     @Override
-    public Optional<VetDTO> patchById(UUID id, VetDTO vetDTO) {
+    public Optional<VetDTO> patchVetById(UUID id, VetDTO vetDTO) {
         AtomicReference<Optional<VetDTO>> atomicReference = new AtomicReference<>();
         vetRepository.findById(id).ifPresentOrElse(foundVet -> {
             if (StringUtils.hasText(vetDTO.getName())) {
@@ -72,7 +72,7 @@ public class VetServiceJpaImpl implements VetService {
             if (vetDTO.getSpeciality() != null) {
                 foundVet.setSpeciality(vetDTO.getSpeciality());
             }
-            atomicReference.set(Optional.of(vetMapper.vetToVetDto(vetRepository.save(foundVet))));
+            atomicReference.set(Optional.of(vetMapper.toDTO(vetRepository.save(foundVet))));
         }, () -> {
             atomicReference.set(Optional.empty());
         });

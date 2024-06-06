@@ -6,11 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,17 +19,14 @@ import java.util.UUID;
 @ToString
 @Entity
 @NoArgsConstructor
-public class Vet {
+public class Vet extends Auditable {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "vet_id", length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "vet_id", updatable = false, nullable = false)
     private UUID id;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Name must not be blank")
     @Size(max = 75)
     private String name;
 
@@ -40,8 +35,22 @@ public class Vet {
     private Speciality speciality;
 
     @Builder.Default
-    @ManyToMany(mappedBy = "vets", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "vets", fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<Pet> pets = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Vet vet = (Vet) o;
+        return Objects.equals(id, vet.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 
 }

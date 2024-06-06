@@ -1,7 +1,7 @@
 package com.PetClinic.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,15 +14,14 @@ public class VisitDTO {
 
     private UUID id;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Diagnosis must not be blank")
     private String diagnosis;
 
+    @PositiveOrZero(message = "Price must be non-negative")
     private Integer price;
 
     private LocalDate date;
 
     private PetDTO pet;
-
 
 }

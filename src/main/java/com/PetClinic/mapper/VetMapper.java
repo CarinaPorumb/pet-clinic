@@ -4,9 +4,9 @@ import com.PetClinic.entity.Vet;
 import com.PetClinic.model.VetDTO;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface VetMapper {
 
-    Vet vetDtoToVet(VetDTO dto);
-    VetDTO vetToVetDto(Vet vet);
+    Vet toEntity(VetDTO dto);
+    VetDTO toDTO(Vet vet);
 }

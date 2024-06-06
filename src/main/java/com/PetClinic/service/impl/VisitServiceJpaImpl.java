@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,21 +24,21 @@ public class VisitServiceJpaImpl implements VisitService {
     private final VisitMapper visitMapper;
 
     @Override
-    public List<VisitDTO> listVisits() {
+    public List<VisitDTO> listVisits(LocalDate startDate, LocalDate endDate, String diagnosis, int pageNumber, int pageSize) {
         return visitRepository.findAll()
                 .stream()
-                .map(visitMapper::visitToVisitDto)
+                .map(visitMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<VisitDTO> getById(UUID id) {
-        return Optional.ofNullable(visitMapper.visitToVisitDto(visitRepository.findById(id).orElse(null)));
+    public Optional<VisitDTO> getVisitById(UUID id) {
+        return Optional.ofNullable(visitMapper.toDTO(visitRepository.findById(id).orElse(null)));
     }
 
     @Override
     public VisitDTO saveNewVisit(VisitDTO visitDTO) {
-        return visitMapper.visitToVisitDto(visitRepository.save(visitMapper.visitDtoToVisit(visitDTO)));
+        return visitMapper.toDTO(visitRepository.save(visitMapper.toEntity(visitDTO)));
     }
 
     @Override
@@ -47,7 +48,7 @@ public class VisitServiceJpaImpl implements VisitService {
             foundVisit.setDate(visitDTO.getDate());
             foundVisit.setDiagnosis(visitDTO.getDiagnosis());
             foundVisit.setPrice(visitDTO.getPrice());
-            atomicReference.set(Optional.of(visitMapper.visitToVisitDto(visitRepository.save(foundVisit))));
+            atomicReference.set(Optional.of(visitMapper.toDTO(visitRepository.save(foundVisit))));
         }, () -> {
             atomicReference.set(Optional.empty());
         });
@@ -55,7 +56,7 @@ public class VisitServiceJpaImpl implements VisitService {
     }
 
     @Override
-    public boolean deleteById(UUID id) {
+    public boolean deleteVisitById(UUID id) {
         if (visitRepository.existsById(id)) {
             visitRepository.deleteById(id);
             return true;
@@ -64,7 +65,7 @@ public class VisitServiceJpaImpl implements VisitService {
     }
 
     @Override
-    public Optional<VisitDTO> patchById(UUID id, VisitDTO visitDTO) {
+    public Optional<VisitDTO> patchVisitById(UUID id, VisitDTO visitDTO) {
         AtomicReference<Optional<VisitDTO>> atomicReference = new AtomicReference<>();
         visitRepository.findById(id).ifPresentOrElse(foundVisit -> {
             if (StringUtils.hasText(visitDTO.getDiagnosis())) {
@@ -76,7 +77,7 @@ public class VisitServiceJpaImpl implements VisitService {
             if (visitDTO.getPrice() != null) {
                 foundVisit.setPrice(visitDTO.getPrice());
             }
-            atomicReference.set(Optional.of(visitMapper.visitToVisitDto(visitRepository.save(foundVisit))));
+            atomicReference.set(Optional.of(visitMapper.toDTO(visitRepository.save(foundVisit))));
         }, () -> {
             atomicReference.set(Optional.empty());
         });

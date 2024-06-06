@@ -25,16 +25,17 @@ public class OwnerController {
     private final OwnerService ownerService;
 
     @GetMapping(value = OWNER_PATH)
-    public Page<OwnerDTO> listOwners(@RequestParam(defaultValue = "0") int page,
+    public Page<OwnerDTO> listOwners(@RequestParam(defaultValue = "name") String name,
+                                     @RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "10") int size) {
         log.info("Request to list all owners at page {} with size {}", page, size);
-        return ownerService.listOwners(page, size);
+        return ownerService.listOwners(name, page, size);
     }
 
     @GetMapping(value = OWNER_PATH_ID)
     public OwnerDTO getOwnerById(@PathVariable("id") UUID id) {
         log.info("Request to get owner by ID: {}", id);
-        return ownerService.getById(id).orElseThrow(() -> new NotFoundException("Owner not found with id: " + id));
+        return ownerService.getOwnerById(id).orElseThrow(() -> new NotFoundException("Owner not found with id: " + id));
     }
 
     @PostMapping(value = OWNER_PATH)
@@ -56,7 +57,7 @@ public class OwnerController {
     @DeleteMapping(value = OWNER_PATH_ID)
     public ResponseEntity<?> deleteOwnerById(@PathVariable("id") UUID id) {
         log.info("Request to delete owner by ID: {}", id);
-        if (!ownerService.deleteById(id))
+        if (!ownerService.deleteOwnerById(id))
             throw new NotFoundException("Owner not found with id: " + id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -64,7 +65,7 @@ public class OwnerController {
     @PatchMapping(value = OWNER_PATH_ID)
     public ResponseEntity<?> patchOwnerById(@PathVariable("id") UUID id, @RequestBody OwnerDTO ownerDTO) {
         log.info("Request to patch owner by ID: {}, with data: {}", id, ownerDTO);
-        ownerService.patchById(id, ownerDTO).orElseThrow(() -> new NotFoundException("Owner not found with id: " + id));
+        ownerService.patchOwnerById(id, ownerDTO).orElseThrow(() -> new NotFoundException("Owner not found with id: " + id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

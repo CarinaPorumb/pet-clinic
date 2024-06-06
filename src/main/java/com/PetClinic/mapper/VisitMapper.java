@@ -4,8 +4,8 @@ import com.PetClinic.entity.Visit;
 import com.PetClinic.model.VisitDTO;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface VisitMapper {
-    Visit visitDtoToVisit(VisitDTO dto);
-    VisitDTO visitToVisitDto(Visit visit);
+    Visit toEntity(VisitDTO dto);
+    VisitDTO toDTO(Visit visit);
 }

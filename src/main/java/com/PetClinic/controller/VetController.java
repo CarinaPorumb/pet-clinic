@@ -4,13 +4,13 @@ import com.PetClinic.exception.NotFoundException;
 import com.PetClinic.model.VetDTO;
 import com.PetClinic.service.VetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,13 +22,13 @@ public class VetController {
     private final VetService vetService;
 
     @GetMapping(value = VET_PATH)
-    public List<VetDTO> listVets() {
-        return vetService.listVets();
+    public Page<VetDTO> listVets(String speciality, int pageNumber, int pageSize) {
+        return vetService.listVets(speciality, pageNumber, pageSize);
     }
 
     @GetMapping(value = VET_PATH_ID)
     public VetDTO getVetById(@PathVariable("id") UUID id) {
-        return vetService.getById(id).orElseThrow(NotFoundException::new);
+        return vetService.getVetById(id).orElseThrow(NotFoundException::new);
     }
 
     @PostMapping(value = VET_PATH)
@@ -48,14 +48,14 @@ public class VetController {
 
     @DeleteMapping(value = VET_PATH_ID)
     public ResponseEntity<?> deleteVetById(@PathVariable("id") UUID id) {
-        if (!vetService.deleteById(id))
+        if (!vetService.deleteVetById(id))
             throw new NotFoundException();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping(value = VET_PATH_ID)
     public ResponseEntity<?> patchVetById(@PathVariable("id") UUID id, @RequestBody VetDTO vetDTO) {
-        vetService.patchById(id, vetDTO);
+        vetService.patchVetById(id, vetDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

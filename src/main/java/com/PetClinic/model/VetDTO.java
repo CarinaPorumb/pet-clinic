@@ -16,8 +16,7 @@ public class VetDTO {
 
     private UUID id;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Name must not be blank")
     @Size(max = 75)
     private String name;
 
@@ -25,6 +24,5 @@ public class VetDTO {
     private Speciality speciality;
 
     private Set<PetDTO> pets;
-
 
 }

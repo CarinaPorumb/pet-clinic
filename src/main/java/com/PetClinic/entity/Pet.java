@@ -4,11 +4,9 @@ import com.PetClinic.model.enums.PetType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -19,16 +17,15 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Entity
-public class Pet {
+public class Pet extends Auditable {
 
     @Id
-    @UuidGenerator
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "pet_id", length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "pet_id", updatable = false, nullable = false)
     private UUID id;
-
 
     @NotBlank(message = "Name must not be blank")
     @Size(max = 75)
@@ -38,20 +35,24 @@ public class Pet {
     @Enumerated(EnumType.STRING)
     private PetType petType;
 
+    @PositiveOrZero(message = "Age must be non-negative")
     private Integer age;
 
+    @PositiveOrZero(message = "Weight must be non-negative")
     private Double weight;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", nullable = false)
+    @ToString.Exclude
     private Owner owner;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "visit_id")
-    private Visit visit;
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private Set<Visit> visits = new HashSet<>();
 
     @Builder.Default
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "pets_vets",
             joinColumns = @JoinColumn(name = "pet_id", referencedColumnName = "pet_id"),
             inverseJoinColumns = @JoinColumn(name = "vet_id", referencedColumnName = "vet_id"))
@@ -64,19 +65,11 @@ public class Pet {
 
     public void removeVet(Vet vet) {
         this.vets.remove(vet);
-        vet.getPets().remove(vet);
+        vet.getPets().remove(this);
     }
 
-    public Pet(UUID id, String name, PetType petType, Integer age, Double weight, Owner owner, Visit visit, Set<Vet> vets) {
-        this.id = id;
-        this.name = name;
-        this.petType = petType;
-        this.age = age;
-        this.weight = weight;
-        this.setOwner(owner);
-        this.visit = visit;
-        this.vets = vets;
-    }
+    @Version
+    private int version;
 
     @Override
     public boolean equals(Object o) {

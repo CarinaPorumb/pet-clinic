@@ -11,14 +11,14 @@ public interface PetService {
 
     Page<PetDTO> listPets(String name, PetType petType, Integer age, Double weight, Integer pageNumber, Integer pageSize);
 
-    Optional<PetDTO> getById(UUID id);
+    Optional<PetDTO> getPetById(UUID id);
 
     PetDTO saveNewPet(PetDTO petDTO);
 
     Optional<PetDTO> updatePet(UUID id, PetDTO petDTO);
 
-    boolean deleteById(UUID id);
+    boolean deletePetById(UUID id);
 
-    Optional<PetDTO> patchById(UUID id, PetDTO petDTO);
+    Optional<PetDTO> patchPetById(UUID id, PetDTO petDTO);
 
 }

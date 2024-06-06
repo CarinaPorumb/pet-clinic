@@ -8,16 +8,16 @@ import java.util.UUID;
 
 public interface OwnerService {
 
-    Page<OwnerDTO> listOwners(int pageNumber, int pageSize);
+    Page<OwnerDTO> listOwners(String name, int pageNumber, int pageSize);
 
-    Optional<OwnerDTO> getById(UUID id);
+    Optional<OwnerDTO> getOwnerById(UUID id);
 
     OwnerDTO saveNewOwner(OwnerDTO ownerDTO);
 
     Optional<OwnerDTO> updateOwner(UUID id, OwnerDTO ownerDTO);
 
-    boolean deleteById(UUID id);
+    boolean deleteOwnerById(UUID id);
 
-    Optional<OwnerDTO> patchById(UUID id, OwnerDTO ownerDTO);
+    Optional<OwnerDTO> patchOwnerById(UUID id, OwnerDTO ownerDTO);
 
 }

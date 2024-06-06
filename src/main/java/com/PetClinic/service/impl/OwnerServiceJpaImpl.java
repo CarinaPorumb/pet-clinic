@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -30,11 +31,18 @@ public class OwnerServiceJpaImpl implements OwnerService {
     private static final int DEFAULT_PAGE_SIZE = 25;
 
     @Override
-    public Page<OwnerDTO> listOwners(int pageNumber, int pageSize) {
+    public Page<OwnerDTO> listOwners(String name, int pageNumber, int pageSize) {
         try {
-            PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
-            Page<OwnerDTO> ownerDTOS = ownerRepository.findAll(pageRequest)
-                    .map(ownerMapper::ownerToOwnerDto);
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
+
+            Page<OwnerDTO> ownerDTOS;
+            if (StringUtils.hasText(name)) {
+                ownerDTOS = ownerRepository.findByNameContainingIgnoreCase(name, pageable)
+                        .map(ownerMapper::toDTO);
+            } else {
+                ownerDTOS = ownerRepository.findAll(pageable)
+                        .map(ownerMapper::toDTO);
+            }
             log.info("Successfully retrieved {} owners", ownerDTOS.getSize());
             return ownerDTOS;
         } catch (Exception e) {
@@ -44,9 +52,9 @@ public class OwnerServiceJpaImpl implements OwnerService {
     }
 
     @Override
-    public Optional<OwnerDTO> getById(UUID id) {
+    public Optional<OwnerDTO> getOwnerById(UUID id) {
         try {
-            Optional<OwnerDTO> ownerDTO = Optional.ofNullable(ownerMapper.ownerToOwnerDto(ownerRepository.findById(id).orElse(null)));
+            Optional<OwnerDTO> ownerDTO = Optional.ofNullable(ownerMapper.toDTO(ownerRepository.findById(id).orElse(null)));
             log.info("Successfully retrieved owner for ID: {}", id);
             return ownerDTO;
         } catch (Exception e) {
@@ -58,7 +66,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
     @Override
     public OwnerDTO saveNewOwner(OwnerDTO ownerDTO) {
         try {
-            OwnerDTO savedOwner = ownerMapper.ownerToOwnerDto(ownerRepository.save(ownerMapper.ownerDtoToOwner(ownerDTO)));
+            OwnerDTO savedOwner = ownerMapper.toDTO(ownerRepository.save(ownerMapper.toEntity(ownerDTO)));
             log.info("Successfully saved new owner with ID: {}", savedOwner.getId());
             return savedOwner;
         } catch (Exception e) {
@@ -76,7 +84,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
                 foundOwner.setName(ownerDTO.getName());
                 foundOwner.setAddress(ownerDTO.getAddress());
                 foundOwner.setTelephone(ownerDTO.getTelephone());
-                atomicReference.set(Optional.of(ownerMapper.ownerToOwnerDto(ownerRepository.save(foundOwner))));
+                atomicReference.set(Optional.of(ownerMapper.toDTO(ownerRepository.save(foundOwner))));
                 log.info("Updated owner with ID: {}", id);
             }, () -> {
                 log.info("No owner found with ID: {}", id);
@@ -91,7 +99,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
     }
 
     @Override
-    public boolean deleteById(UUID id) {
+    public boolean deleteOwnerById(UUID id) {
         try {
             if (ownerRepository.existsById(id)) {
                 ownerRepository.deleteById(id);
@@ -107,7 +115,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
     }
 
     @Override
-    public Optional<OwnerDTO> patchById(UUID id, OwnerDTO ownerDTO) {
+    public Optional<OwnerDTO> patchOwnerById(UUID id, OwnerDTO ownerDTO) {
         try {
             AtomicReference<Optional<OwnerDTO>> atomicReference = new AtomicReference<>();
             ownerRepository.findById(id).ifPresentOrElse(foundOwner -> {
@@ -125,11 +133,11 @@ public class OwnerServiceJpaImpl implements OwnerService {
                     isUpdated = true;
                 }
                 if (isUpdated) {
-                    OwnerDTO updatedOwner = ownerMapper.ownerToOwnerDto(ownerRepository.save(foundOwner));
+                    OwnerDTO updatedOwner = ownerMapper.toDTO(ownerRepository.save(foundOwner));
                     atomicReference.set(Optional.of(updatedOwner));
                     log.info("Owner with ID: {} patched successfully", id);
                 } else {
-                    atomicReference.set(Optional.of(ownerMapper.ownerToOwnerDto(foundOwner)));
+                    atomicReference.set(Optional.of(ownerMapper.toDTO(foundOwner)));
                     log.info("No changes applied to owner with ID: {}", id);
                 }
             }, () -> {

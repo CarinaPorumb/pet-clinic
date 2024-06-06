@@ -38,7 +38,7 @@ public class PetController {
     @GetMapping(value = PET_PATH_ID)
     public PetDTO getPetById(@PathVariable("id") UUID id) {
         log.info("Request to get Pet by id {}", id);
-        return petService.getById(id).orElseThrow(() -> new NotFoundException("Pet not found with id: " + id));
+        return petService.getPetById(id).orElseThrow(() -> new NotFoundException("Pet not found with id: " + id));
     }
 
     @PostMapping(value = PET_PATH)
@@ -60,7 +60,7 @@ public class PetController {
     @DeleteMapping(value = PET_PATH_ID)
     public ResponseEntity<?> deletePetById(@PathVariable("id") UUID id) {
         log.info("Request to delete pet by id {}", id);
-        if (!petService.deleteById(id))
+        if (!petService.deletePetById(id))
             throw new NotFoundException("Pet not found with id: " + id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -68,7 +68,7 @@ public class PetController {
     @PatchMapping(value = PET_PATH_ID)
     public ResponseEntity<?> patchPetById(@PathVariable("id") UUID id, @RequestBody PetDTO petDTO) {
         log.info("Request to patch pet by id: {}, with data: {}", id, petDTO);
-        petService.patchById(id, petDTO).orElseThrow(() -> new NotFoundException("Pet not found with id: " + id));
+        petService.patchPetById(id, petDTO).orElseThrow(() -> new NotFoundException("Pet not found with id: " + id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
