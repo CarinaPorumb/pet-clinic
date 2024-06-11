@@ -5,10 +5,11 @@ import com.PetClinic.model.enums.PetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.UUID;
 
-public interface PetRepository extends JpaRepository<Pet, UUID> {
+public interface PetRepository extends JpaRepository<Pet, UUID>, JpaSpecificationExecutor<Pet> {
 
     Page<Pet> findAllByNameIsLikeIgnoreCase(String name, Pageable pageable);
 

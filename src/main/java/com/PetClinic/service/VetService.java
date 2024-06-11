@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface VetService {
 
-    Page<VetDTO> listVets(String speciality, int pageNumber, int pageSize);
+    Page<VetDTO> listVets(String name, String speciality, Integer pageNumber, Integer pageSize);
 
     Optional<VetDTO> getVetById(UUID id);
 

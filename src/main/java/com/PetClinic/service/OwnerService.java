@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface OwnerService {
 
-    Page<OwnerDTO> listOwners(String name, int pageNumber, int pageSize);
+    Page<OwnerDTO> listOwners(String name, String address, String telephone, Integer pageNumber, Integer pageSize);
 
     Optional<OwnerDTO> getOwnerById(UUID id);
 

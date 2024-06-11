@@ -21,7 +21,7 @@ and [OAuth2 Authorization Server Repository](https://github.com/CarinaPorumb/spr
 
 - Java 21
 - Spring Boot 3.3.0
-- Spring MVC
+- Spring MVC for RESTful controllers
 - Spring Security
 - Spring Data JPA
 - MySQL Database
@@ -102,7 +102,7 @@ Once the application is running, it will be available at [http://localhost:8080]
 
 <br>
 
-- #### 3. Clone and Set up the Pet Clinic Project
+- #### 3. Clone and Set Up the Pet Clinic Project
 
 After setting up the OAuth2 Authorization Server and Spring Cloud Gateway, clone and set up the Pet Clinic project:
 

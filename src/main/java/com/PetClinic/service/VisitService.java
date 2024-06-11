@@ -1,15 +1,15 @@
 package com.PetClinic.service;
 
 import com.PetClinic.model.VisitDTO;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface VisitService {
 
-    List<VisitDTO> listVisits(LocalDate startDate, LocalDate endDate, String diagnosis, int pageNumber, int pageSize);
+    Page<VisitDTO> listVisits(String diagnosis, LocalDate date, Integer price, Integer pageNumber, Integer pageSize);
 
     Optional<VisitDTO> getVisitById(UUID id);
 

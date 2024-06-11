@@ -1,19 +1,26 @@
 package com.PetClinic.service.impl;
 
+import com.PetClinic.entity.Vet;
 import com.PetClinic.mapper.VetMapper;
 import com.PetClinic.model.VetDTO;
 import com.PetClinic.repository.VetRepository;
 import com.PetClinic.service.VetService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+
+@Slf4j
 @Primary
 @RequiredArgsConstructor
 @Service
@@ -23,60 +30,88 @@ public class VetServiceJpaImpl implements VetService {
     private final VetMapper vetMapper;
 
     @Override
-    public Page<VetDTO> listVets(String speciality, int pageNumber, int pageSize) {
-        return (Page<VetDTO>) vetRepository.findAll()
-                .stream()
-                .map(vetMapper::toDTO)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<VetDTO> listVets(String name, String speciality, Integer pageNumber, Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("name").ascending());
+
+        Specification<Vet> vetSpecification = Specification
+                .where(SpecificationUtils.<Vet>attributeLike("name", name))
+                .and(SpecificationUtils.attributeLike("speciality", speciality));
+
+        log.info("Listing vet with filters - Name: {}, Speciality: {}", name, speciality);
+        return vetRepository.findAll(vetSpecification, pageable).map(vetMapper::toDTO);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<VetDTO> getVetById(UUID id) {
-        return Optional.ofNullable(vetMapper.toDTO(vetRepository.findById(id).orElse(null)));
+        log.debug("Attempting to find vet with ID: {}", id);
+        return vetRepository.findById(id)
+                .map(vetMapper::toDTO);
     }
 
     @Override
+    @Transactional
     public VetDTO saveNewVet(VetDTO vetDTO) {
-        return vetMapper.toDTO(vetRepository.save(vetMapper.toEntity(vetDTO)));
+        log.debug("Saving new vet: {}", vetDTO);
+        Vet savedVet = vetRepository.save(vetMapper.toEntity(vetDTO));
+        log.info("Successfully saved new vet with ID: {}", savedVet.getId());
+        return vetMapper.toDTO(savedVet);
     }
 
     @Override
+    @Transactional
     public Optional<VetDTO> updateVet(UUID id, VetDTO vetDTO) {
-        AtomicReference<Optional<VetDTO>> atomicReference = new AtomicReference<>();
-        vetRepository.findById(id).ifPresentOrElse(foundVet -> {
-            foundVet.setName(vetDTO.getName());
-            foundVet.setSpeciality(vetDTO.getSpeciality());
-            atomicReference.set(Optional.of(vetMapper.toDTO(vetRepository.save(foundVet))));
-        }, () -> {
-            atomicReference.set(Optional.empty());
-        });
-        return atomicReference.get();
+        log.debug("Updating vet with ID: {}", id);
+        return vetRepository.findById(id)
+                .map(existingVet -> {
+                    existingVet.setName(vetDTO.getName());
+                    existingVet.setSpeciality(vetDTO.getSpeciality());
+                    vetRepository.save(existingVet);
+                    log.info("Vet updated with ID: {}", existingVet.getId());
+                    return vetMapper.toDTO(existingVet);
+                });
     }
 
     @Override
+    @Transactional
     public boolean deleteVetById(UUID id) {
-        if (vetRepository.existsById(id)) {
-            vetRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        log.debug("Attempting to delete vet with ID: {}", id);
+        return vetRepository.findById(id)
+                .map(vet -> {
+                    vetRepository.delete(vet);
+                    log.info("Vet deleted with ID: {}", id);
+                    return true;
+                }).orElse(false);
+
     }
 
     @Override
+    @Transactional
     public Optional<VetDTO> patchVetById(UUID id, VetDTO vetDTO) {
-        AtomicReference<Optional<VetDTO>> atomicReference = new AtomicReference<>();
-        vetRepository.findById(id).ifPresentOrElse(foundVet -> {
-            if (StringUtils.hasText(vetDTO.getName())) {
-                foundVet.setName(vetDTO.getName());
+        log.debug("Patching vet with ID: {}", id);
+
+        return vetRepository.findById(id).map(existingVet -> {
+            boolean isUpdated = false;
+
+            if (StringUtils.hasText(vetDTO.getName()) && !existingVet.getName().equals(vetDTO.getName())) {
+                existingVet.setName(vetDTO.getName());
+                isUpdated = true;
             }
-            if (vetDTO.getSpeciality() != null) {
-                foundVet.setSpeciality(vetDTO.getSpeciality());
+            if (vetDTO.getSpeciality() != null && !existingVet.getSpeciality().equals(vetDTO.getSpeciality())) {
+                existingVet.setSpeciality(vetDTO.getSpeciality());
+                isUpdated = true;
             }
-            atomicReference.set(Optional.of(vetMapper.toDTO(vetRepository.save(foundVet))));
-        }, () -> {
-            atomicReference.set(Optional.empty());
+
+            if (isUpdated) {
+                vetRepository.save(existingVet);
+                log.info("Vet with ID: {} patched successfully", id);
+            } else {
+                log.info("No changes applied to vet with ID: {}", id);
+            }
+            return vetMapper.toDTO(existingVet);
         });
-        return atomicReference.get();
     }
 
 }
