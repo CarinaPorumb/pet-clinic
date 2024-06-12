@@ -4,6 +4,8 @@ import com.PetClinic.exception.NotFoundException;
 import com.PetClinic.model.VisitDTO;
 import com.PetClinic.service.VisitService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,53 +13,65 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
+@RequestMapping("/api/v1/visit")
 @RequiredArgsConstructor
 public class VisitController {
 
-    public static final String VISIT_PATH = "/api/v1/visit";
-    public static final String VISIT_PATH_ID = VISIT_PATH + "/{id}";
     private final VisitService visitService;
 
-    @GetMapping(value = VISIT_PATH)
-    public List<VisitDTO> listVisits(LocalDate startDate, LocalDate endDate, String diagnosis, int pageNumber, int pageSize) {
-        return visitService.listVisits(startDate, endDate, diagnosis, pageNumber, pageSize);
+    @GetMapping
+    public ResponseEntity<Page<VisitDTO>> listVisits(
+            @RequestParam(required = false, defaultValue = "") String diagnosis,
+            @RequestParam(required = false, defaultValue = "") LocalDate date,
+            @RequestParam(required = false, defaultValue = "") Integer price,
+            @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        log.info("Request to list visits");
+        return ResponseEntity.ok(visitService.listVisits(diagnosis, date, price, pageNumber, pageSize));
     }
 
-    @GetMapping(value = VISIT_PATH_ID)
-    public VisitDTO getVisitById(@PathVariable("id") UUID id) {
-        return visitService.getVisitById(id).orElseThrow(NotFoundException::new);
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<VisitDTO> getVisitById(@PathVariable("id") UUID id) {
+        log.info("Request to get visit by id {}", id);
+        return ResponseEntity.ok(visitService.getVisitById(id)
+                .orElseThrow(() -> new NotFoundException("Visit not found with id " + id)));
     }
 
-    @PostMapping(value = VISIT_PATH)
-    public ResponseEntity<?> createNewVisit(@Validated @RequestBody VisitDTO visitDTO) {
+    @PostMapping
+    public ResponseEntity<VisitDTO> createNewVisit(@Validated @RequestBody VisitDTO visitDTO) {
+        log.info("Request to create new visit {}", visitDTO);
         VisitDTO savedVisit = visitService.saveNewVisit(visitDTO);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "/api/v1/visit/" + savedVisit.getId().toString());
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(savedVisit, headers, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = VISIT_PATH_ID)
-    public ResponseEntity<?> updateVisitById(@PathVariable("id") UUID id, @Validated @RequestBody VisitDTO visitDTO) {
-        if (visitService.updateVisit(id, visitDTO).isEmpty())
-            throw new NotFoundException();
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<VisitDTO> updateVisitById(@PathVariable("id") UUID id, @Validated @RequestBody VisitDTO visitDTO) {
+        log.info("Request to update visit by ID {}", id);
+        return ResponseEntity.ok(visitService.updateVisit(id, visitDTO)
+                .orElseThrow(() -> new NotFoundException("Visit not found with ID " + id)));
     }
 
-    @DeleteMapping(value = VISIT_PATH_ID)
+    @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteVisitById(@PathVariable("id") UUID id) {
-        if (!visitService.deleteVisitById(id))
-            throw new NotFoundException();
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        log.info("Request to delete visit by id {}", id);
+        boolean deleted = visitService.deleteVisitById(id);
+        if (!deleted) {
+            throw new NotFoundException("Visit not found with id " + id);
+        }
+        return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(value = VISIT_PATH_ID)
-    public ResponseEntity<?> patchVisitById(@PathVariable("id") UUID id, @RequestBody VisitDTO visitDTO) {
-        visitService.patchVisitById(id, visitDTO);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PatchMapping(value = "/{id}")
+    public ResponseEntity<VisitDTO> patchVisitById(@PathVariable("id") UUID id, @RequestBody VisitDTO visitDTO) {
+        log.info("Request to patch visit by ID: {}, with data: {}", id, visitDTO);
+        return ResponseEntity.ok(visitService.patchVisitById(id, visitDTO)
+                .orElseThrow(() -> new NotFoundException("Visit not found with id: " + id)));
     }
 
 }
