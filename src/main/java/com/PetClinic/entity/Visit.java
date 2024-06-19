@@ -35,7 +35,7 @@ public class Visit extends Auditable {
     private int version;
 
     @ManyToOne
-    @JoinColumn(name = "pet_id", nullable = false)
+    @JoinColumn(name = "pet_id")
     @ToString.Exclude
     private Pet pet;
 

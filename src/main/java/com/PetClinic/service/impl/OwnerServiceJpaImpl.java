@@ -4,6 +4,7 @@ import com.PetClinic.entity.Owner;
 import com.PetClinic.mapper.OwnerMapper;
 import com.PetClinic.model.OwnerDTO;
 import com.PetClinic.repository.OwnerRepository;
+import com.PetClinic.repository.PetRepository;
 import com.PetClinic.service.OwnerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
     private final OwnerMapper ownerMapper;
+    private final PetRepository petRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -80,6 +82,7 @@ public class OwnerServiceJpaImpl implements OwnerService {
         log.debug("Attempting to delete owner with ID: {}", id);
         return ownerRepository.findById(id)
                 .map(owner -> {
+                    petRepository.deleteOwnerFromPet(id);
                     ownerRepository.delete(owner);
                     log.info("Deleted owner with ID: {}", id);
                     return true;

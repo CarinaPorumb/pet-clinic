@@ -39,7 +39,7 @@ public class VisitServiceJpaImpl implements VisitService {
                 .and(SpecificationUtils.attributeEquals("date", date))
                 .and(SpecificationUtils.attributeEquals("price", price));
 
-        log.debug("Listing visits with filters - Diagnosis: " + diagnosis + ", Date: " + date + ", Price: " + price);
+        log.debug("Listing visits with filters - Diagnosis: {}, Date: {}, Price: {}", diagnosis, date, price);
         return visitRepository.findAll(visitSpecification, pageable).map(visitMapper::toDTO);
     }
 

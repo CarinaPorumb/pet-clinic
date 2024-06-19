@@ -1,10 +1,12 @@
 # Pet Clinic  [![CircleCI](https://dl.circleci.com/status-badge/img/circleci/5vWvCHPxWZ7cHvpFmPPqjK/FMuALQo8kLTAXHGsgUwVkq/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/5vWvCHPxWZ7cHvpFmPPqjK/FMuALQo8kLTAXHGsgUwVkq/tree/main)
 
-This project is a simple Java application using Spring Boot that provides a web application aiming to become a management system for a pet clinic. It uses JPA for database integration, REST controllers for API endpoints, and secures its endpoints with JWT tokens through integration with an OAuth2 Authorization Server. The application also uses Spring Cloud Gateway to handle and route requests securely.
+This is a simple Java application that aims to become a pet clinic management system. The app uses JPA to handle database operations and RESTful controllers for API endpoints. Security is enforced with JWT tokens via an OAuth2 Authorization Server. Additionally, it uses Spring Cloud Gateway to manage and route requests securely.
 
 **Note: This project requires two additional
 repositories ([Spring Cloud Gateway](https://github.com/CarinaPorumb/spring-cloud-gateway)
 and [OAuth2 Authorization Server Repository](https://github.com/CarinaPorumb/spring-oauth2)) to be set up and running.**
+
+**Optional: For additional functionality, you may set up the [Pet Clinic Client](https://github.com/CarinaPorumb/pet-clinic-client) project.**
 
 ---
 
@@ -26,7 +28,6 @@ and [OAuth2 Authorization Server Repository](https://github.com/CarinaPorumb/spr
 - Spring Data JPA
 - MySQL Database
 - OAuth2 Authorization Server with JWT
-
 
 --- 
 
@@ -130,11 +131,37 @@ Once the application is running, it will be available at [http://localhost:8081]
 
 ---
 
+### Optional: Pet Clinic Client
+
+For additional functionality, you may set up the Pet Clinic Client project. This client can interact with the Pet Clinic service for various operations.
+
+Clone and set up the Pet Clinic Client project:
+
+```bash
+git clone https://github.com/CarinaPorumb/pet-clinic-client
+```
+<br>
+Build the project using Maven:
+
+```bash
+mvn clean install
+```
+<br>
+You can run the application using your IDE or from the command line:
+
+```bash
+mvn spring-boot:run
+```
+
+Once the application is running, it will be available at [http://localhost:8082](http://localhost:8082).
+
+
 ### Startup Order
 
 1. **Start the OAuth2 Authorization Server**: [http://localhost:9000](http://localhost:9000)
 2. **Start the Pet Clinic**: [http://localhost:8081](http://localhost:8081)
 3. **Start the Spring Cloud Gateway**: [http://localhost:8080](http://localhost:8080)
+4. **_Optional_: Start the Pet Clinic Client**: [http://localhost:8082](http://localhost:8082)
 
 ---
 

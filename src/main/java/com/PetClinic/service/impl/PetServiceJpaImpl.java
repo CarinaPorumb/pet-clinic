@@ -64,6 +64,12 @@ public class PetServiceJpaImpl implements PetService, CSVConversionService<PetCS
     @Transactional
     public PetDTO saveNewPet(PetDTO petDTO) {
         log.debug("Saving new pet: {}", petDTO);
+
+        if (petDTO.getId() == null) {
+            petDTO.setId(UUID.randomUUID());
+            log.debug("Generated new UUID for pet: {}", petDTO.getId());
+        }
+
         Pet savedPet = petRepository.save(petMapper.toEntity(petDTO));
         log.info("Successfully saved new pet with ID: {}", savedPet.getId());
         return petMapper.toDTO(savedPet);
@@ -92,7 +98,7 @@ public class PetServiceJpaImpl implements PetService, CSVConversionService<PetCS
         return petRepository.findById(id)
                 .map(pet -> {
                     petRepository.delete(pet);
-                    log.info("Deleted owner with ID: {}", id);
+                    log.info("Deleted pet with ID: {}", id);
                     return true;
                 }).orElse(false);
     }

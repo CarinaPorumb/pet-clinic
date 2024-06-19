@@ -42,7 +42,7 @@ public class Pet extends Auditable {
     private Double weight;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id")
     @ToString.Exclude
     private Owner owner;
 

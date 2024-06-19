@@ -39,7 +39,7 @@ public class VetServiceJpaImpl implements VetService {
                 .where(SpecificationUtils.<Vet>attributeLike("name", name))
                 .and(SpecificationUtils.attributeLike("speciality", speciality));
 
-        log.info("Listing vet with filters - Name: {}, Speciality: {}", name, speciality);
+        log.info("Listing vets with filters - Name: {}, Speciality: {}", name, speciality);
         return vetRepository.findAll(vetSpecification, pageable).map(vetMapper::toDTO);
     }
 
